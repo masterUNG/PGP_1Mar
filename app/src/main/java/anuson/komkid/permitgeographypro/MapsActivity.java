@@ -10,6 +10,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,25 +36,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private Criteria criteria;
     private Double userLatADouble= 0.0 , userLngADouble = 0.0;
+    private String[] titleString;
+    private final int[] index = {0};
+    private Button button;
+    private double[] latDoubles, lngDoubles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.my_layout_maps);
 
-        loginStrings = getIntent().getStringArrayExtra("Login");
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
+        setUpConstant();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+
     }// Main Method
+
+    private void buttonController() {
+
+        button = (Button) findViewById(R.id.btnChooseSpinner);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Log.d("1MarchV1", "index ==> " + index[0]);
+
+                LatLng latLng = new LatLng(latDoubles[index[0]], lngDoubles[index[0]]);
+                moveCenterMap(latLng);
+
+            }   // onClick
+        });
+
+
+    }
+
+    private void setUpConstant() {
+        loginStrings = getIntent().getStringArrayExtra("Login");
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+    }
 
     @Override
     protected void onResume() {
@@ -155,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        moveCenterMap(latLng);
 
         try {
 
@@ -165,10 +198,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("18DecV2", "JSON==>" + s);
 
             JSONArray jsonArray = new JSONArray(s);
-            String[] titleString = new String[jsonArray.length()];
+            titleString = new String[jsonArray.length()];
             String[] typeStrings = new String[jsonArray.length()];
-            double[] latDoubles = new double[jsonArray.length()];
-            double[] lngDoubles = new double[jsonArray.length()];
+            latDoubles = new double[jsonArray.length()];
+            lngDoubles = new double[jsonArray.length()];
             String[] mem_idStrings = new String[jsonArray.length()];
 
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -198,6 +231,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
 
+            //Create Spinner
+
+            Spinner spinner = (Spinner) findViewById(R.id.spnGarden);
+            ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(MapsActivity.this,
+                    android.R.layout.simple_list_item_1, titleString);
+            spinner.setAdapter(stringArrayAdapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    index[0] = i;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                    index[0] = 0;
+                }
+            });
+
+            buttonController();
 
         } catch (Exception e) {
             Log.d("18DecV2", "e ==>" + e.toString());
@@ -207,6 +259,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }//onMapReady
+
+    private void moveCenterMap(LatLng latLng) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+    }
 
     private void showAlert(final String title, final String mem_id) {
 
