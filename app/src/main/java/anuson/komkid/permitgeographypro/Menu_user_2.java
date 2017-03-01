@@ -39,6 +39,11 @@ public class Menu_user_2 extends Activity {
             Log.d("18JanV1", "userLogin" + i + "]=" + userLoginStrings[i]);
         }//for
 
+        createListView();
+
+    }// Main Method
+
+    private void createListView() {
         try {
             SysReserv sysReserv = new SysReserv(Menu_user_2.this, userLoginStrings[0]);
             sysReserv.execute();
@@ -77,6 +82,10 @@ public class Menu_user_2 extends Activity {
                 date_reserv[i] = jsonObject1.getString("date_reserv");
                 expDate_reserv[i] = dateThai(addOneDay(date_reserv[i]));
 
+                checkExpDate(addOneDay(date_reserv[i]),
+                        jsonObject1.getString("post_id"),
+                        jsonObject1.getString("status_reserv_id"));
+
                 Log.d("18JanV5", "date_reserv(" + i + ") ==> " + date_reserv[i]);
 
 
@@ -109,8 +118,50 @@ public class Menu_user_2 extends Activity {
         } catch (Exception e) {
             Log.d("27novV3", "e menu3 ==> " + e.toString());
         }
+    }
 
-    }//onCreate
+    private void checkExpDate(String strExpDate,
+                              String strPostID,
+                              String strStatus) {
+
+        String tag = "1MarchV3";
+        Log.d(tag, "สิ่งที่ได้รับมา ==>" + strExpDate);
+
+        String[] strings = strExpDate.split("-");
+        Calendar currentCalendar = Calendar.getInstance();
+        Calendar expCalendar = Calendar.getInstance();
+        expCalendar.set(Calendar.YEAR, Integer.parseInt(strings[0]));
+        expCalendar.set(Calendar.MONTH, Integer.parseInt(strings[1])-1);
+        expCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(strings[2]));
+
+        Log.d(tag, "currentCalendar ==> " + currentCalendar.getTime().toString());
+        Log.d(tag, "expCalendar ==> " + expCalendar.getTime().toString());
+
+        if (currentCalendar.after(expCalendar)) {
+            Log.d(tag, "Show ExpDate ==> " + expCalendar.getTime().toString());
+            Log.d(tag, "post_id ==> " + strPostID);
+
+            try {
+
+                if (Integer.parseInt(strStatus) == 1) {
+
+                    EditStatusWhenExip editStatusWhenExip = new EditStatusWhenExip(Menu_user_2.this);
+                    editStatusWhenExip.execute(strPostID);
+                    if (Boolean.parseBoolean(editStatusWhenExip.get())) {
+                        createListView();
+                    }
+
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+
+    }   // checkExpDate
 
     private String addOneDay(String strDateTime) {
 
@@ -152,7 +203,7 @@ public class Menu_user_2 extends Activity {
         calendar.set(Calendar.DAY_OF_YEAR, intDayOfYear);
         Log.d(tag, "expDate ==> " + calendar.getTime().toString());
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         result = dateFormat.format(calendar.getTime());
         Log.d(tag, "result ==> " + result);
 
@@ -170,13 +221,7 @@ public class Menu_user_2 extends Activity {
                 "พ.ค", "มิ.ย", "ก.ค", "ส.ค",
                 "ก.ย", "ต.ค", "พ.ย", "ธ.ค"};
 
-        String tag = "1MarchV3";
-        Log.d(tag, "สิ่งที่รับมา ==> " + strDate);
-
-        String[] myDate = strDate.split("/");
-
-
-        SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
         int year = 0, month = 0, day = 0;
         try {
