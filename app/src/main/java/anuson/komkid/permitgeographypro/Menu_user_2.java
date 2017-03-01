@@ -11,6 +11,7 @@ import android.widget.ListView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -74,15 +75,14 @@ public class Menu_user_2 extends Activity {
                 pic2Strings[i] = jsonObject1.getString("post_pic_two");
                 idStrings[i] = jsonObject1.getString("post_id");
                 date_reserv[i] = jsonObject1.getString("date_reserv");
-                expDate_reserv[i] = addOneDay(date_reserv[i]);
+                expDate_reserv[i] = dateThai(addOneDay(date_reserv[i]));
 
                 Log.d("18JanV5", "date_reserv(" + i + ") ==> " + date_reserv[i]);
 
 
-
             }//for
             MyReservListview myReservListview = new MyReservListview(Menu_user_2.this,
-                    titleStrings, data_endStrings, statusShowStrings);
+                    titleStrings, expDate_reserv, statusShowStrings);
             listView.setAdapter(myReservListview);
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -98,13 +98,12 @@ public class Menu_user_2 extends Activity {
                     intent.putExtra("post_pic", pic1Strings[i]);
                     intent.putExtra("post_pic_two", pic2Strings[i]);
 
-                    intent.putExtra("Login",userLoginStrings);
-                    intent.putExtra("idPost",idStrings[i]);
+                    intent.putExtra("Login", userLoginStrings);
+                    intent.putExtra("idPost", idStrings[i]);
 
                     startActivity(intent);
                 }
             });
-
 
 
         } catch (Exception e) {
@@ -120,6 +119,42 @@ public class Menu_user_2 extends Activity {
 
         String[] myDate = strDateTime.split(" ");
         Log.d(tag, "strDateTime ==> " + strDateTime);
+        Log.d(tag, "วันที่เริ่มจอง ==> " + myDate[0]);
+
+        String[] myDate2 = myDate[0].split("-");
+        int intYear = Integer.parseInt(myDate2[0]);
+        int intMonth = Integer.parseInt(myDate2[1]) - 1;
+        int intDay = Integer.parseInt(myDate2[2]);
+
+        String[] myDate3 = myDate[1].split(":");
+        int intHr = Integer.parseInt(myDate3[0]);
+        int intMinus = Integer.parseInt(myDate3[1]);
+        int intSecond = Integer.parseInt(myDate3[2]);
+
+        Log.d(tag, "Year ==> " + intYear);
+        Log.d(tag, "Month ==> " + intMonth);
+        Log.d(tag, "Day ==> " + intDay);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, intYear);
+        calendar.set(Calendar.MONTH, intMonth);
+        calendar.set(Calendar.DAY_OF_MONTH, intDay);
+        calendar.set(Calendar.HOUR_OF_DAY, intHr);
+        calendar.set(Calendar.MINUTE, intMinus);
+        calendar.set(Calendar.SECOND, intSecond);
+
+        Log.d(tag, "เวลาในรูปแบบ Calendar ==> " + calendar.getTime().toString());
+
+        int intDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+        Log.d(tag, "วันในรูปแบบปี ==> " + intDayOfYear);
+
+        intDayOfYear += 1;
+        calendar.set(Calendar.DAY_OF_YEAR, intDayOfYear);
+        Log.d(tag, "expDate ==> " + calendar.getTime().toString());
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        result = dateFormat.format(calendar.getTime());
+        Log.d(tag, "result ==> " + result);
 
         return result;
     }
@@ -128,16 +163,25 @@ public class Menu_user_2 extends Activity {
         String[] strings = new String[]{"กำลังขาย", "จอง", "สิ้นสุด"};
         return strings[Integer.parseInt(statusString)];
     }
-    public static String dateThai(String strDate){
+
+    public static String dateThai(String strDate) {
         String Months[] = {
                 "ม.ค", "ก.พ", "มี.ค", "เม.ย",
                 "พ.ค", "มิ.ย", "ก.ค", "ส.ค",
                 "ก.ย", "ต.ค", "พ.ย", "ธ.ค"};
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-        int year=0,month=0,day=0;
+        String tag = "1MarchV3";
+        Log.d(tag, "สิ่งที่รับมา ==> " + strDate);
+
+        String[] myDate = strDate.split("/");
+
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+
+        int year = 0, month = 0, day = 0;
         try {
             Date date = df.parse(strDate);
+
             Calendar c = Calendar.getInstance();
             c.setTime(date);
 
@@ -147,6 +191,6 @@ public class Menu_user_2 extends Activity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return String.format("%s %s %s", day,Months[month],year+543);
+        return String.format("%s %s %s", day, Months[month], year + 543);
     }
 }
