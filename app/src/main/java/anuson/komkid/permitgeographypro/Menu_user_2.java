@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,6 +55,8 @@ public class Menu_user_2 extends Activity {
             final String[] startStrings = new String[jsonArray.length()];
             final String[] pic1Strings = new String[jsonArray.length()];
             final String[] pic2Strings = new String[jsonArray.length()];
+            String[] date_reserv = new String[jsonArray.length()];
+            String[] expDate_reserv = new String[jsonArray.length()];
 
             final String[] idStrings = new String[jsonArray.length()];
 
@@ -72,8 +72,13 @@ public class Menu_user_2 extends Activity {
                 startStrings[i] = jsonObject1.getString("post_data_ster");
                 pic1Strings[i] = jsonObject1.getString("post_pic");
                 pic2Strings[i] = jsonObject1.getString("post_pic_two");
-
                 idStrings[i] = jsonObject1.getString("post_id");
+                date_reserv[i] = jsonObject1.getString("date_reserv");
+                expDate_reserv[i] = addOneDay(date_reserv[i]);
+
+                Log.d("18JanV5", "date_reserv(" + i + ") ==> " + date_reserv[i]);
+
+
 
             }//for
             MyReservListview myReservListview = new MyReservListview(Menu_user_2.this,
@@ -107,6 +112,17 @@ public class Menu_user_2 extends Activity {
         }
 
     }//onCreate
+
+    private String addOneDay(String strDateTime) {
+
+        String result = null;
+        String tag = "1MarchV2";
+
+        String[] myDate = strDateTime.split(" ");
+        Log.d(tag, "strDateTime ==> " + strDateTime);
+
+        return result;
+    }
 
     private String showStatus(String statusString) {
         String[] strings = new String[]{"กำลังขาย", "จอง", "สิ้นสุด"};
